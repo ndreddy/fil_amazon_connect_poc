@@ -1,0 +1,18 @@
+boto3
+botocore
+moto    # mocking aws resources
+docker  # moto needs it
+fastapi
+uvicorn
+SQLAlchemy
+pydantic
+pytest-asyncio
+pytest
+pytest-cov
+httpx
+requests
+requests
+jose
+warrant
+starlette
+ischedule
