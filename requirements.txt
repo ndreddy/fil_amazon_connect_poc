@@ -1,18 +1,11 @@
-boto3
-botocore
-moto    # mocking aws resources
-docker  # moto needs it
-fastapi
-uvicorn
-SQLAlchemy
-pydantic
+boto3~=1.18.14
+botocore~=1.21.14
+
 pytest-asyncio
-pytest
+pytest~=6.2.4
 pytest-cov
 httpx
 requests
-requests
-jose
-warrant
-starlette
-ischedule
+
+ischedule~=1.2.2
+pika~=1.2.0

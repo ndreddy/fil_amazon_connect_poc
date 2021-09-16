@@ -4,9 +4,8 @@ import logging
 
 import boto3
 
-from app.services import sqs_client
-from app.services.queue_metrics import get_current_metric_data
-from app.services.sqs_client import create_queue
+from app import sqs_client
+from app.queue_metrics import get_current_metric_data
 from ischedule import schedule, run_loop
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from datetime import datetime
 
 import boto3
 
-from app.config import region, instance_id, queue_id, queue_arn, current_metrics, metric_filters
+from config import region, CONNECT_INSTANCE_ID, CONNECT_QUEUE_ID, CONNECT_QUEUE_ARN, current_metrics, metric_filters
 
 logger = logging.getLogger(__name__)
 connect = boto3.client('connect', region_name=region)
@@ -15,7 +15,7 @@ def get_current_metric_data():
     :return: metrics in FIL format
     """
     response = connect.get_current_metric_data(
-        InstanceId=instance_id,
+        InstanceId=CONNECT_INSTANCE_ID,
         Filters=metric_filters,
         CurrentMetrics=current_metrics,
         MaxResults=10
@@ -60,8 +60,8 @@ def transform_metrics(response):
 def get_stats_template():
     return {
         "timestamp": datetime.utcnow().isoformat(),
-        "aesName": instance_id,
-        "skillExtension": queue_id,
+        "aesName": CONNECT_INSTANCE_ID,
+        "skillExtension": CONNECT_QUEUE_ID,
         "queueCount": 0,
         "agentCount": 0,
         "mostIdleAgentTime": 0,
