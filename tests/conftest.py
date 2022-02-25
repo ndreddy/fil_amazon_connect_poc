@@ -12,7 +12,7 @@ from httpx import AsyncClient
 
 from moto import mock_s3, mock_sqs, mock_lambda, mock_iam, mock_ssm
 
-from app.callback_req import callback_lambda
+from app.callback_function import lambda_function
 
 
 def pytest_addoption(parser):
@@ -55,15 +55,13 @@ def region():
 
 
 @pytest.fixture
-def ssm_mock():
+def ssm_mock(aws_credentials):
     with mock_ssm():
-        ssm = boto3.client("ssm", region_name="us-west-2")
-
+        ssm = boto3.client("ssm")
         ssm.put_parameter(
             Name=f"/FIL/CALLBACK_REQ_URL", Description="FIL callback req url",
             Value="http://10.91.11.151:9845/filrestproxy/queuecallback", Type="String"
         )
-        callback_lambda.ssm = ssm
         yield ssm
 
 

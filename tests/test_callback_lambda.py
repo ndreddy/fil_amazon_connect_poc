@@ -1,10 +1,12 @@
 import json
 
-from app.callback_req import callback_lambda
+import pytest
 
+from app.callback_function import lambda_function
 
-def test_callback_lambda():
-    body = {
+test_data = [
+
+    ({
         "ani": "37532",
         "applicationName": "fil_template",
         "banner": [
@@ -43,11 +45,26 @@ def test_callback_lambda():
             "callBackExtension": "",
             "geolocation": ""
         }
-    }
+    })
+]
 
+
+@pytest.mark.parametrize("body", test_data)
+def test_callback_lambda(ssm_mock, body):
     event = {'httpMethod': "POST", 'body': json.dumps(body)}
     context = {'request_id': '1234'}
 
-    result = callback_lambda.lambda_handler(event, context)
+    result = lambda_function.lambda_handler(event, context)
     print(str(result))
     assert result
+
+
+test_data = [('https://postman-echo.com/post', {'title': 'foo', 'body': 'bar', 'userId': 1, },
+              {'Content-Type': 'application/json; utf-8'})]
+
+
+@pytest.mark.parametrize("url, data, headers", test_data)
+def test_make_post_request(url, data, headers):
+    res = lambda_function.make_post_request(url, data, headers, ('user', 'pass'))
+    print(res)
+    assert res
