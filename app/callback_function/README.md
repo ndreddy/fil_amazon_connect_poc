@@ -39,11 +39,15 @@ pip install --target ./package requests
 cd package
 zip -r ../callback-deployment-package.zip .
 
-# Add the lambda_function.py file to the root of the zip file.
+
 cd ..
+# Repeat these when ever you change the code.
+# Add the lambda_function.py file to the root of the zip file.
 zip -g callback-deployment-package.zip lambda_function.py
 # Deploy your .zip file to the function
 aws lambda update-function-code --function-name callback_req_lambda --zip-file fileb://callback-deployment-package.zip
+
+# Invoke the function
 aws lambda invoke --function-name callback_req_lambda --log-type Tail --payload file://payload.json response.json --query 'LogResult' --output text |  base64 -d
 
 ```

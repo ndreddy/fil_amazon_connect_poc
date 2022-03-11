@@ -60,7 +60,7 @@ def ssm_mock(aws_credentials):
         ssm = boto3.client("ssm")
         ssm.put_parameter(
             Name=f"/FIL/CALLBACK_REQ_URL", Description="FIL callback req url",
-            Value="http://10.91.11.151:9845/filrestproxy/queuecallback", Type="String"
+            Value="http://34.216.178.192:10180/filrestproxy/queuecallback", Type="String"
         )
         yield ssm
 

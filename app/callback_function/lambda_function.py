@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -9,16 +10,20 @@ logger.setLevel(logging.DEBUG)
 
 REGION = os.environ.get('REGION', "us-west-2")
 REQ_TIMEOUT = os.environ.get('REQ_TIMEOUT', 1.5)
+USERNAME = os.environ.get('CALLBACK_USERNAME', "mike")
+PASSWORD = os.environ.get('CALLBACK_PASSWORD', "mike1")
+
 ssm_client = boto3.client('ssm', REGION)
 
 
 def lambda_handler(event, context):
     logger.info(f'lambda started {event} context: {context}')
     data = event['body']
+    logger.info(f'Request body {data} context: {context}')
     url = ssm_client.get_parameter(Name=f"/FIL/CALLBACK_REQ_URL", WithDecryption=True).get(
         'Parameter').get('Value')
     headers = {'Content-Type': 'application/json; utf-8'}
-    return make_post_request(url, data, headers, timeout=float(REQ_TIMEOUT))
+    return make_post_request(url, data, headers, (USERNAME, PASSWORD), timeout=float(REQ_TIMEOUT))
 
 
 def make_post_request(url: str, data: dict, headers: dict, auth: tuple = None, timeout: float = None) -> dict:
@@ -33,30 +38,24 @@ def make_post_request(url: str, data: dict, headers: dict, auth: tuple = None, t
     """
     logger.debug(f'Making POST request to {url} with data = {data} and headers = {headers}')
     try:
-        r = requests.post(url, headers=headers, data=data, auth=auth, timeout=timeout)
+        r = requests.post(url, json=data, headers=headers, auth=auth, timeout=timeout)
         r.raise_for_status()
-    except requests.exceptions.HTTPError:
-        logger.error("Http Error:")
-    except requests.exceptions.ConnectionError:
-        logger.error("Error Connecting:")
-    except requests.exceptions.Timeout:
-        logger.error("Timeout Error:")
-    except requests.exceptions.RequestException:
-        logger.error("OOps: Something wrong")
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"Http Error Occurred:{r.text}")
+        return {"Error": e.response}
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Error Connecting Occurred:{e}")
+        return {"Error": e.response}
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Timeout Error Occurred:{e}")
+        return {"Error": e.response}
+    except requests.exceptions.RequestException as e:
+        logger.error(f"OOps: Something wrong:{e}")
+        return {"Error": e.response}
 
-    logger.debug("Returning hardcode response ...")
-    response = {
-        "statusCode": 200,
-        "authenticationToken": "9124de26-b105-403f-8dde-9f9f744455b3",
-        "callBackRequestId": "FIL-13-1",
-        "errorMsg": "Success",
-        "ewt": 130,
-        "ewtHigh": 195,
-        "ewtLow": 91,
-        "preExistingCallbackTime": "",
-        "queueName": "AFSkill",
-        "queuePos": 1,
-        "result": "SUCCESS"
-    }
-    logger.debug(f'API response = {response}')
+    logger.debug(f"POST Response status: {r.status_code}, Response text: {r.text}")
+    response = json.loads(r.text).get("return")
+    response["statusCode"] = r.status_code
+
+    logger.debug(f'Returning response = {response}')
     return response
