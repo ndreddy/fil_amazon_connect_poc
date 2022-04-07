@@ -9,7 +9,6 @@ test_data = [
     ({
 
         "ani": "2011231556",
-        "appData": "param_map=<?xml version\\x3d'1.0' encoding\\x3d'UTF-8'?>\n<concurrent-hash-map>\n  <entry>\n    <string>contact.offer.ani</string>\n    <string>2011231556</string>\n  </entry>\n  <entry>\n    <string>language</string>\n    <string>english</string>\n  </entry>\n  <entry>\n    <string>contact.offer.time</string>\n    <string>2022-03-11 15:53:13</string>\n  </entry>\n  <entry>\n    <string>queue.id</string>\n    <string>1</string>\n  </entry>\n  <entry>\n    <string>callback.offer.type</string>\n    <string>asap</string>\n  </entry>\n  <entry>\n    <string>contact.offer.uui</string>\n    <string>a3a88bad-b43c-4421-82ab-ced63815b20c</string>\n  </entry>\n  <entry>\n    <string>contact.callback.ext</string>\n    <string>null</string>\n  </entry>\n  <entry>\n    <string>callback.type</string>\n    <string>CALLBACK_NORMAL</string>\n  </entry>\n  <entry>\n    <string>contact.offer.vdn</string>\n    <string>Seg</string>\n  </entry>\n  <entry>\n    <string>contact.offer.ewt</string>\n    <int>0</int>\n  </entry>\n  <entry>\n    <string>contact.offer.ucid</string>\n    <string>7567556f-9b6d-454e-b4f4-51557d570ae1</string>\n  </entry>\n  <entry>\n    <string>queue.agent.first</string>\n    <boolean>false</boolean>\n   </entry>\n  <entry>\n    <string>contact.callback_uri</string>\n    <string>2011231556</string>\n  </entry>\n  <entry>\n    <string>contact.offer.session_id</string>\n    <string>a3a88bad-b43c-4421-82ab-ced63815b20c</string>\n  </entry>\n  <entry>\n    <string>contact.offer.dnis</string>\n    <string>Seg</string>\n  </entry>\n</concurrent-hash-map>",
         "callBackPhone": "2011231556",
         "callBackExtension": "",
         "clientType": "WEB",
@@ -48,3 +47,53 @@ def test_make_post_request(url, data, headers):
     res = lambda_function.make_post_request(url, data, headers, ('user', 'pass'))
     print(res)
     assert res
+
+
+test_data = [
+
+    ({
+        'ContactData': {
+            'Attributes': {},
+            'Channel': 'VOICE',
+            'ContactId': '550de66e-5ca1-4b59-944c-9010c1fcfd6e',
+            'CustomerEndpoint': {
+                'Address': '+12082971868',
+                'Type': 'TELEPHONE_NUMBER'
+            },
+            'CustomerId': None,
+            'Description': None,
+            'InitialContactId': '550de66e-5ca1-4b59-944c-9010c1fcfd6e',
+            'InitiationMethod': 'INBOUND',
+            'InstanceARN': 'arn:aws:connect:us-west-2:804094754830:instance/ba24bb27-e8be-415f-9f82-8de74eb8ce78',
+            'LanguageCode': 'en-US',
+            'MediaStreams': {
+                'Customer': {
+                    'Audio': None
+                }
+            },
+            'Name': None,
+            'PreviousContactId': '550de66e-5ca1-4b59-944c-9010c1fcfd6e',
+            'Queue': None,
+            'References': {},
+            'SystemEndpoint': {
+                'Address': '+12143069489',
+                'Type': 'TELEPHONE_NUMBER'
+            }
+        },
+        'Parameters': {
+            'callBackPhone': '98459845',
+            'callBackExtension': '1234'
+        }
+    }
+
+    )
+]
+
+
+@pytest.mark.parametrize("details", test_data)
+def test_populate_data(details):
+    data = lambda_function.populate_data(details)
+    assert data.get("ani") == '+12082971868'
+    assert data.get("dnis") == '+12143069489'
+    assert data.get("callBackPhone") == '98459845'
+    assert data.get("callBackExtension") == '1234'
