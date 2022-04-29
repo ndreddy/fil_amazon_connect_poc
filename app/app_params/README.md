@@ -13,7 +13,7 @@ aws ssm put-parameter --name "/FIL/REST_PROXY_BASE_URL" --value "http://54.187.7
 aws ssm get-parameters --names "/FIL/REST_PROXY_BASE_URL"
 
 aws lambda create-function \
-    --function-name queue_details \
+    --function-name app_params \
     --region us-west-2  \
     --zip-file fileb://deployment-package.zip \
     --handler init_db.lambda_handler \
@@ -21,8 +21,8 @@ aws lambda create-function \
     --role arn:aws:iam::<account-id>:role/fil_lambda-ex-role \
     --environment "Variables={REGION=us-west-2, REQ_TIMEOUT=1.5}"
     
-aws lambda update-function-configuration --function-name callabck_req_lambda --environment "Variables={REGION=us-west-2, REQ_TIMEOUT=1.5}"
-aws lambda get-function-configuration --function-name callabck_req_lambda
+aws lambda update-function-configuration --function-name app_params --environment "Variables={REGION=us-west-2, REQ_TIMEOUT=1.5}"
+aws lambda get-function-configuration --function-name app_params
 ```
 
 ## Retrieve environment variables in function code
@@ -63,9 +63,9 @@ cd ..
 # Add the lambda_function.py file to the root of the zip file.
 zip -g deployment-package.zip.zip lambda_function.py
 # Deploy your .zip file to the function
-aws lambda update-function-code --function-name callabck_req_lambda --zip-file fileb://deployment-package.zip.zip
+aws lambda update-function-code --function-name app_params --zip-file fileb://deployment-package.zip.zip
 
 # Invoke the function
-aws lambda invoke --function-name callabck_req_lambda --log-type Tail --payload file://payload.json response.json --query 'LogResult' --output text |  base64 -d
+aws lambda invoke --function-name app_params --log-type Tail --payload file://payload.json response.json --query 'LogResult' --output text |  base64 -d
 
 ```

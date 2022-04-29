@@ -23,7 +23,7 @@ def lambda_handler(event, context):
     logger.info(f'Request body {data} context: {context}')
     url = ssm_client.get_parameter(Name=f"/FIL/REST_PROXY_BASE_URL", WithDecryption=True).get(
         'Parameter').get('Value')
-    url = f'{url}/queuecallback'
+    url = f'{url}/queuesdetails'
     headers = {'Content-Type': 'application/json; utf-8'}
     return make_post_request(url, data, headers, (USERNAME, PASSWORD), timeout=float(REQ_TIMEOUT))
 
@@ -37,27 +37,8 @@ def populate_data(details):
     queueId = details.get('ContactData', {}).get('Queue', "1")
 
     # Customer params sent from lambda
-    callBackPhone = details.get('Parameters', {}).get('callBackPhone', "")
-    callBackExtension = details.get('Parameters', {}).get('callBackExtension', "")
-    nameText = details.get('Parameters', {}).get('nameText', "")
-    reasonText = details.get('Parameters', {}).get('reasonText', "")
-
-    data = {
-        "ani": ani,
-        "callBackPhone": callBackPhone,
-        "callBackExtension": callBackExtension,
-        "clientType": clientType,
-        "dnis": dnis,
-        "ewt": "0",
-        "nameText": nameText,
-        "reasonText": reasonText,
-        "geolocation": None,
-        "offerVdn": "Seg",
-        "queueId": "1",
-        "sessionId": "a3a88bad-b43c-4421-82ab-ced63815b20c",
-        "ucid": ucid,
-        "uui": "a3a88bad-b43c-4421-82ab-ced63815b20c"
-    }
+    params = details.get('Parameters', {})
+    data = {}
     return data
 
 
@@ -95,8 +76,7 @@ def make_post_request(url: str, data: dict, headers: dict, auth: tuple = None, t
         return response
 
     logger.debug(f"POST Success status: {r.status_code}, Response text: {r.text}")
-    response = json.loads(r.text).get("return")
-    response["statusCode"] = r.status_code
+    response = {"statusCode": r.status_code, "queues": json.loads(r.text).get("return")}
 
     logger.debug(f'Returning response = {response}')
     return response

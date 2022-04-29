@@ -21,8 +21,8 @@ aws lambda create-function \
     --role arn:aws:iam::<account-id>:role/fil_lambda-ex-role \
     --environment "Variables={REGION=us-west-2, REQ_TIMEOUT=1.5}"
     
-aws lambda update-function-configuration --function-name callabck_req_lambda --environment "Variables={REGION=us-west-2, REQ_TIMEOUT=1.5}"
-aws lambda get-function-configuration --function-name callabck_req_lambda
+aws lambda update-function-configuration --function-name queue_details --environment "Variables={REGION=us-west-2, REQ_TIMEOUT=1.5}"
+aws lambda get-function-configuration --function-name queue_details
 ```
 
 ## Retrieve environment variables in function code
@@ -63,9 +63,9 @@ cd ..
 # Add the lambda_function.py file to the root of the zip file.
 zip -g deployment-package.zip.zip lambda_function.py
 # Deploy your .zip file to the function
-aws lambda update-function-code --function-name callabck_req_lambda --zip-file fileb://deployment-package.zip.zip
+aws lambda update-function-code --function-name queue_details --zip-file fileb://deployment-package.zip.zip
 
 # Invoke the function
-aws lambda invoke --function-name callabck_req_lambda --log-type Tail --payload file://payload.json response.json --query 'LogResult' --output text |  base64 -d
+aws lambda invoke --function-name queue_details --log-type Tail --payload file://payload.json response.json --query 'LogResult' --output text |  base64 -d
 
 ```

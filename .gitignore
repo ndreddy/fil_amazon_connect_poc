@@ -1,3 +1,7 @@
 /venv/
 /.idea/
-/app/callback_function/package/
+/app/*/package/*
+
+/app/*/*deployment-package.zip.zip
+/Pipfile
+/Pipfile.lock
