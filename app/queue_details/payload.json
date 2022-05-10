@@ -28,7 +28,7 @@
         "Type": "TELEPHONE_NUMBER"
       }
     },
-    "Parameters": {}
+    "Parameters": { "segment": "Seg"}
   },
   "Name": "ContactFlowEvent"
 }

@@ -19,27 +19,27 @@ ssm_client = boto3.client('ssm', REGION)
 def lambda_handler(event, context):
     logger.info(f'lambda started {event} context: {context}')
     details = event['Details']
-    data = populate_data(details)
+    segment = get_segment(details)
+    data = {"offerVdn": segment}
     logger.info(f'Request body {data} context: {context}')
     url = ssm_client.get_parameter(Name=f"/FIL/REST_PROXY_BASE_URL", WithDecryption=True).get(
         'Parameter').get('Value')
-    url = f'{url}/queuesdetails'
+    url = f'{url}/queueinfobyoffervdn'
     headers = {'Content-Type': 'application/json; utf-8'}
     return make_post_request(url, data, headers, (USERNAME, PASSWORD), timeout=float(REQ_TIMEOUT))
 
 
-def populate_data(details):
+def get_segment(details):
     # Connect System parameters
-    ani = details.get('ContactData', {}).get('CustomerEndpoint', {}).get("Address", "")
-    dnis = details.get('ContactData', {}).get('SystemEndpoint', {}).get("Address", "")
-    clientType = details.get('ContactData', {}).get('Channel', "VOICE")
-    ucid = details.get('ContactData', {}).get('ContactId', "")
-    queueId = details.get('ContactData', {}).get('Queue', "1")
+    queue = details.get('ContactData', {}).get('Queue', "")
+    logger.info(f'Contact Data queue is - {queue} ')
 
     # Customer params sent from lambda
     params = details.get('Parameters', {})
-    data = {}
-    return data
+    segment = params.get('segment', "")
+    logger.info(f'Parameter segment is - {segment} ')
+
+    return segment
 
 
 def make_post_request(url: str, data: dict, headers: dict, auth: tuple = None, timeout: float = None) -> dict:
@@ -76,7 +76,15 @@ def make_post_request(url: str, data: dict, headers: dict, auth: tuple = None, t
         return response
 
     logger.debug(f"POST Success status: {r.status_code}, Response text: {r.text}")
-    response = {"statusCode": r.status_code, "queues": json.loads(r.text).get("return")}
+    return_val = json.loads(r.text).get("return")
 
+    # Connect flow does not support nested items.
+    return_val = filter_nested_items(return_val)
+    logger.debug(f'Filtered queue details = {return_val}')
+    response = {"statusCode": r.status_code, **return_val}
     logger.debug(f'Returning response = {response}')
     return response
+
+
+def filter_nested_items(data_dict):
+    return {k: v for (k, v) in data_dict.items() if not isinstance(v, dict)}

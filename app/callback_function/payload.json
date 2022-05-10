@@ -28,7 +28,9 @@
         "Type": "TELEPHONE_NUMBER"
       }
     },
-    "Parameters": {}
+    "Parameters": {
+      "callback_number": "98459845"
+    }
   },
   "Name": "ContactFlowEvent"
 }
