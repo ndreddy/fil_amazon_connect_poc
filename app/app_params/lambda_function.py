@@ -81,11 +81,19 @@ def make_post_request(url: str, data: dict, headers: dict, auth: tuple = None, t
 
     # Connect flow does not support nested items.
     return_val = filter_nested_items(return_val)
+    return_val = convert_ewt_to_minutes(return_val)
     logger.debug(f'Filtered queue details = {return_val}')
     response = {"statusCode": r.status_code, **return_val}
     logger.debug(f'Returning response = {response}')
+
     return response
 
 
 def filter_nested_items(data_dict):
-    return {k: v for (k, v) in data_dict.items() if not isinstance(v, dict)}
+    return {k.replace(".", "_"): v for (k, v) in data_dict.items() if not isinstance(v, dict)}
+
+
+def convert_ewt_to_minutes(data_dict):
+    ewt_minutes = round(int(data_dict.get("queue_override_ewt", 0)) / 60)
+    data_dict.update(queue_override_ewt=ewt_minutes)
+    return data_dict
